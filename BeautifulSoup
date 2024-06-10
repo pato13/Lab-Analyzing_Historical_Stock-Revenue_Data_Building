@@ -1,0 +1,29 @@
+url = 'https://cf-courses-data.s3.us.cloud-object-storage.appdomain.cloud/IBMDeveloperSkillsNetwork-PY0220EN-SkillsNetwork/labs/project/revenue.htm'
+html_data = requests.get(url).text 
+
+soup = BeautifulSoup(html_data,'html5lib')
+
+dates = []
+revenues = []
+
+# Loop through rows of the table
+for row in soup.find_all('tr'):
+    # Extract data from each cell in the row
+    cells = row.find_all('td')
+    if len(cells) == 2:  # Check if there are exactly two cells (Date and Revenue)
+        date = cells[0].text.strip()  # Strip whitespace from the text
+        revenue = cells[1].text.strip().replace('$', '').replace(',', '')  # Strip whitespace, $, and commas
+        dates.append(date)
+        revenues.append(revenue)
+
+# Create DataFrame
+tesla_revenue = pd.DataFrame({'Date': dates, 'Revenue': revenues})
+
+tesla_revenue["Revenue"] = tesla_revenue['Revenue'].str.replace(',|\$',"")
+
+tesla_revenue.dropna(inplace=True)
+
+tesla_revenue = tesla_revenue[tesla_revenue['Revenue'] != ""]
+
+print(tesla_revenue.tail(5))
+
